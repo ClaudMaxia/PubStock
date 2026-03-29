@@ -1,3 +1,11 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+<title>PubStock — Gestione Pub</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
   import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
@@ -17,14 +25,6 @@
 
   window.firebaseDB = { db, ref, set, get, onValue };
 </script>
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
-<title>PubStock — Gestione Pub</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--bg:#0D0D0D;--surface:#1A1A1A;--surface2:#242424;--surface3:#2E2E2E;--amber:#E8A838;--amber-dim:#B8832A;--amber-glow:rgba(232,168,56,.15);--red:#D94848;--green:#4CAF6A;--blue:#4A90D9;--purple:#9B72CF;--text:#F0EDE6;--text-dim:#8A8578;--text-muted:#5A564E;--radius:14px;--radius-sm:8px;--safe-bottom:env(safe-area-inset-bottom,0px)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -440,8 +440,6 @@ function fmtDateIT(d){return d.toLocaleDateString('it-IT',{weekday:'short',day:'
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
 
 // ===== CLOUD =====
-E sostituiscile così:
-
 async function cSet(k, d) {
   try {
     const { db, ref, set } = window.firebaseDB;
