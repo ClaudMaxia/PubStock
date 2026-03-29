@@ -1,3 +1,22 @@
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAqgWydsTjiAN1IKM1WB3K6dqAgUUS9AJo",
+    authDomain: "pubstock-oldstyle.firebaseapp.com",
+    databaseURL: "https://pubstock-oldstyle-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "pubstock-oldstyle",
+    storageBucket: "pubstock-oldstyle.firebasestorage.app",
+    messagingSenderId: "1052880724858",
+    appId: "1:1052880724858:web:bde27e9ba8b8eda513ecc3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.firebaseDB = { db, ref, set, get, onValue };
+</script>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -421,8 +440,29 @@ function fmtDateIT(d){return d.toLocaleDateString('it-IT',{weekday:'short',day:'
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
 
 // ===== CLOUD =====
-async function cSet(k,d){try{return!!(await window.storage.set(k,JSON.stringify(d),true))}catch(e){return false}}
-async function cGet(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null}catch(e){return null}}
+E sostituiscile così:
+
+async function cSet(k, d) {
+  try {
+    const { db, ref, set } = window.firebaseDB;
+    await set(ref(db, k), d);
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
+
+async function cGet(k) {
+  try {
+    const { db, ref, get } = window.firebaseDB;
+    const snapshot = await get(ref(db, k));
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
 function setSyncUI(s){
   document.getElementById('syncDot').className='sync-dot '+s;
   document.getElementById('sd2').className='sd '+(s==='synced'?'ok':s==='syncing'?'busy':'err');
@@ -466,7 +506,33 @@ async function syncFromCloud(){
   }catch(e){setSyncUI('error')}
 }
 async function manualSync(){setSyncUI('syncing');await syncFromCloud();refreshView();showToast('Sincronizzato!')}
-function startSync(){if(syncInterval)clearInterval(syncInterval);syncInterval=setInterval(syncFromCloud,8000)}
+function startSync() {
+  try {
+    const { db, ref, onValue } = window.firebaseDB;
+    const dataRef = ref(db, 'pubstock-alldata');
+
+    onValue(dataRef, (snapshot) => {
+      const d = snapshot.val();
+      if (!d) return;
+
+      products = d.products || [];
+      events = d.events || [];
+      notes = d.notes || {};
+      shifts = d.shifts || [];
+      reservations = d.reservations || [];
+
+      prevNoteCount = Object.values(notes).reduce((s, a) => s + a.length, 0);
+      refreshView();
+      setSyncUI('synced');
+    }, (error) => {
+      console.error(error);
+      setSyncUI('error');
+    });
+  } catch (e) {
+    console.error(e);
+    setSyncUI('error');
+  }
+}
 function refreshView(){
   if(currentTab==='Inv')renderInventory();
   else if(currentTab==='Ev')renderCalendar();
